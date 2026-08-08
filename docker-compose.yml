@@ -1,0 +1,16 @@
+version: "3.9"
+services:
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: medisafe_user
+      POSTGRES_PASSWORD: medisafe_pass
+      POSTGRES_DB: medisafe_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - medisafe_pgdata:/var/lib/postgresql/data
+
+volumes:
+  medisafe_pgdata:
