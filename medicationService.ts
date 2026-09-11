@@ -1,38 +1,31 @@
+import { backendApi } from "./backendApi";
 import { supabase, unwrap, requireUserId } from "./api";
 import type { Medication, MedicationInput, Schedule, ScheduleInput } from "./types";
 
+type BackendResponse<T> = { success: boolean; data: T };
+
 export async function getMedications(): Promise<Medication[]> {
-  return unwrap(
-    await supabase.from("medications").select("*").order("created_at", { ascending: false }),
-    "Unable to load medications. Please try again.",
-  );
+  const response = await backendApi.get<BackendResponse<Medication[]>>("/medications");
+  return response.data;
 }
 
 export async function getMedication(id: string): Promise<Medication> {
-  return unwrap(
-    await supabase.from("medications").select("*").eq("id", id).single(),
-    "Unable to load this medication.",
-  );
+  const response = await backendApi.get<BackendResponse<Medication>>(`/medications/${id}`);
+  return response.data;
 }
 
 export async function createMedication(input: MedicationInput): Promise<Medication> {
-  const user_id = await requireUserId();
-  return unwrap(
-    await supabase.from("medications").insert({ ...input, user_id }).select().single(),
-    "We couldn't save your medication. Please check the information and try again.",
-  );
+  const response = await backendApi.post<BackendResponse<Medication>>("/medications", input);
+  return response.data;
 }
 
 export async function updateMedication(id: string, input: Partial<MedicationInput>): Promise<Medication> {
-  return unwrap(
-    await supabase.from("medications").update(input).eq("id", id).select().single(),
-    "We couldn't update your medication. Please try again.",
-  );
+  const response = await backendApi.patch<BackendResponse<Medication>>(`/medications/${id}`, input);
+  return response.data;
 }
 
 export async function deleteMedication(id: string): Promise<void> {
-  const { error } = await supabase.from("medications").delete().eq("id", id);
-  if (error) throw new Error("We couldn't delete this medication. Please try again.");
+  await backendApi.delete(`/medications/${id}`);
 }
 
 export async function getSchedules(medicationId?: string): Promise<Schedule[]> {

@@ -1,30 +1,22 @@
-import { supabase, unwrap, requireUserId } from "./api";
+import { backendApi } from "./backendApi";
 import type { VitalInput, VitalLog } from "./types";
 
+type BackendResponse<T> = { success: boolean; data: T };
+
 export async function getVitals(limit = 200): Promise<VitalLog[]> {
-  return unwrap(
-    await supabase.from("vital_logs").select("*").order("recorded_at", { ascending: false }).limit(limit),
-    "Unable to load your health records. Please try again.",
-  );
+  const response = await backendApi.get<BackendResponse<VitalLog[]>>("/vitals");
+  return response.data.slice(0, limit);
 }
 
 export async function createVital(input: VitalInput): Promise<VitalLog> {
-  const user_id = await requireUserId();
-  return unwrap(
-    await supabase.from("vital_logs").insert({ ...input, user_id }).select().single(),
-    "We couldn't save this health record. Please check the values and try again.",
-  );
+  const response = await backendApi.post<BackendResponse<VitalLog>>("/vitals", input);
+  return response.data;
 }
 
 export async function deleteVital(id: string): Promise<void> {
-  const { error } = await supabase.from("vital_logs").delete().eq("id", id);
-  if (error) throw new Error("We couldn't delete this record. Please try again.");
+  await backendApi.delete(`/vitals/${id}`);
 }
 
-/**
- * Informational reference ranges only. Sources: WHO/ISH and NHS general adult
- * reference ranges. These are NOT diagnoses and are shown as information only.
- */
 export const REFERENCE_RANGES = {
   systolic: { min: 90, max: 140, label: "Systolic blood pressure", unit: "mmHg" },
   diastolic: { min: 60, max: 90, label: "Diastolic blood pressure", unit: "mmHg" },
