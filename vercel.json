@@ -1,15 +1,3 @@
 {
-  "services": {
-    "backend": {
-      "root": "backend/",
-      "entrypoint": "api.index:app"
-    },
-    "frontend": {
-      "root": "frontend/"
-    }
-  },
-  "rewrites": [
-    { "source": "/api/(.*)", "destination": { "service": "backend" } },
-    { "source": "/(.*)", "destination": { "service": "frontend" } }
-  ]
+  "$schema": "https://openapi.vercel.sh/vercel.json"
 }
