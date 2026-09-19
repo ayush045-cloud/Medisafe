@@ -1,0 +1,1 @@
+import{S as e}from"./index-D7pcHmlG.js";var t=class extends Error{};function n(e,n){if(e.error)throw console.error(n,e.error),new t(n);return e.data}async function r(){let{data:n,error:r}=await e.auth.getUser();if(r||!n.user)throw new t(`Your session has expired. Please sign in again.`);return n.user.id}export{n,r as t};
