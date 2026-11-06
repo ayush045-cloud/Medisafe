@@ -19,6 +19,13 @@ export default function Dashboard() {
     await refreshMedicationReminders();
   }, []);
   useFocusEffect(useCallback(() => { load().catch(e => Alert.alert('Could not load dashboard', e.message)); }, [load]));
+  async function markDose(id: string, status: 'TAKEN' | 'SKIPPED') {
+    try {
+      const { error } = await supabase.from('medication_logs').update({ status, taken_at: status === 'TAKEN' ? new Date().toISOString() : null, updated_at: new Date().toISOString() }).eq('id', id);
+      if (error) throw error;
+      await load();
+    } catch (e: any) { Alert.alert('Could not update dose', e.message); }
+  }
   return <Screen><ScrollView refreshControl={<RefreshControl refreshing={refreshing} onRefresh={async()=>{setRefreshing(true);try{await load()}catch(e:any){Alert.alert('Refresh failed',e.message)}finally{setRefreshing(false)}}} />} showsVerticalScrollIndicator={false}>
     <Text style={{ color: colors.green, fontWeight: '900', letterSpacing: 1.5, marginTop: 10 }}>MEDISAFE</Text>
     <Heading title={`Good day, ${name}.`} subtitle="Here is your health overview." />
@@ -27,7 +34,7 @@ export default function Dashboard() {
       <Card style={{ flex: 1 }}><Text style={{ color: colors.muted }}>Unread alerts</Text><Text style={{ fontSize: 30, fontWeight: '900', color: colors.ink }}>{alerts.length}</Text></Card>
     </View>
     <Text style={{ fontSize: 18, fontWeight: '800', color: colors.ink, marginVertical: 10 }}>Today's medication activity</Text>
-    {logs.length === 0 ? <Card><Message>No dose activity is recorded yet. Add a medicine schedule to get started.</Message></Card> : logs.map((item) => <Card key={item.id}><Text style={{ fontWeight: '800', color: colors.ink }}>{item.medications?.medication_name || 'Medication'}</Text><Text style={{ color: colors.muted, marginTop: 5 }}>{new Date(item.scheduled_at).toLocaleString()} · {item.status}</Text></Card>)}
+    {logs.length === 0 ? <Card><Message>No dose activity is recorded yet. Add a medicine schedule to get started.</Message></Card> : logs.map((item) => <Card key={item.id}><Text style={{ fontWeight: '800', color: colors.ink }}>{item.medications?.medication_name || 'Medication'}</Text><Text style={{ color: colors.muted, marginTop: 5 }}>{new Date(item.scheduled_at).toLocaleString()} · {item.status}</Text>{item.status === 'PENDING' ? <View style={{ flexDirection: 'row', gap: 8, marginTop: 8 }}><View style={{ flex: 1 }}><Text onPress={() => markDose(item.id, 'TAKEN')} style={{ color: colors.green, fontWeight: '800', padding: 8, textAlign: 'center', backgroundColor: colors.pale, borderRadius: 8 }}>Mark taken</Text></View><View style={{ flex: 1 }}><Text onPress={() => markDose(item.id, 'SKIPPED')} style={{ color: colors.amber, fontWeight: '800', padding: 8, textAlign: 'center', backgroundColor: '#FFF5E6', borderRadius: 8 }}>Skip dose</Text></View></View> : null}</Card>)}
     <Text style={{ fontSize: 18, fontWeight: '800', color: colors.ink, marginVertical: 10 }}>Recent alerts</Text>
     {alerts.length === 0 ? <Card><Message>You are all caught up.</Message></Card> : alerts.map(a => <Card key={a.id}><Text style={{ fontWeight: '700', color: colors.ink }}>{a.message}</Text><Text style={{ color: colors.muted, marginTop: 5 }}>{a.severity} · {new Date(a.created_at).toLocaleString()}</Text></Card>)}
   </ScrollView></Screen>;
