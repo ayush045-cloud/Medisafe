@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { Alert, ScrollView, Text } from 'react-native';
 import { useFocusEffect } from 'expo-router';
 import { api } from '../../lib/api';
