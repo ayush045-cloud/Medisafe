@@ -30,6 +30,9 @@ jobs:
       - name: Install mobile dependencies
         working-directory: mobile
         run: npm install
+      - name: Align dependencies with Expo SDK
+        working-directory: mobile
+        run: npx expo install --fix
       - name: Generate Android project
         working-directory: mobile
         run: npx expo prebuild --platform android --no-install
