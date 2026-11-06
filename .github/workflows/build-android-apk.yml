@@ -36,6 +36,13 @@ jobs:
       - name: Generate Android project
         working-directory: mobile
         run: npx expo prebuild --platform android --no-install
+      - name: Diagnose Expo Android autolinking modules
+        working-directory: mobile
+        run: |
+          echo "=== Expo module resolution ==="
+          npx expo-modules-autolinking resolve --platform android
+          echo "=== Expo module config files ==="
+          find node_modules -name expo-module.config.json -print
       - name: Build installable debug APK
         working-directory: mobile/android
         run: chmod +x gradlew && ./gradlew assembleDebug
