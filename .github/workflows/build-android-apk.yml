@@ -4,6 +4,12 @@ on:
   push:
     branches:
       - feature/android-expo-app
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'mobile/**'
+      - '.github/workflows/build-android-apk.yml'
   workflow_dispatch:
 
 jobs:
